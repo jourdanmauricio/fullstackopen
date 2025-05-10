@@ -3,6 +3,7 @@ import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
 import Filter from './components/Filter'
 import personService from './services/persons'
+import Notification from './components/Notification'
 
 
 function App() {
@@ -11,6 +12,7 @@ function App() {
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
   const [filteredPersons, setFilteredPersons] = useState([])
+  const [notification, setNotification] = useState(null)
 
   useEffect(() => {
     personService
@@ -20,6 +22,16 @@ function App() {
     })
   }, [])
  
+  const handleNotification = ({message, type}) => {
+    if (type === 'success') {
+      setNewName('')
+      setNewNumber('')
+    }
+    setNotification({message, type})
+    setTimeout(() => {
+      setNotification(null)
+    }, 5000)
+  }
   
   const handleNameChange = (event) => {
     setNewName(event.target.value)
@@ -50,8 +62,11 @@ function App() {
           .update(found.id, {...personObject, number: newNumber})
           .then(returnedPerson => {
             setPersons(persons.map(person => person.id !== returnedPerson.id ? person : returnedPerson))
-            setNewName('')
-            setNewNumber('')
+            handleNotification({message: 'Phone modified successfully', type: 'success'})
+          })
+          .catch(error => {
+            console.log("Error", error)
+            handleNotification({message: 'An error happened while editing the contact', type: 'error'})
           })
       }
     } else {
@@ -59,9 +74,12 @@ function App() {
         .create(personObject)
         .then(returnedPerson => {
           setPersons(persons.concat(returnedPerson))
-          setNewName('')
-          setNewNumber('')
-      })
+          handleNotification({message: `Added ${returnedPerson.name}`, type: 'success'})
+        })
+        .catch(error => {
+          console.log("Error", error)
+          handleNotification({message: 'An error occurred while creating the contact', type: 'error'})
+        })
     }
   }
 
@@ -73,7 +91,13 @@ function App() {
         .then(response => {
           const newPersons = persons.filter(person => person.id !== response.id)
           setPersons(newPersons)
+          handleNotification({message: 'Contact deleted successfully', type: 'success'})
         })
+        .catch(error => {
+          console.log("Error", error)
+          handleNotification({message: 'An error occurred while deleting the contact', type: 'error'})
+        })
+    
     }
   }
 
@@ -82,6 +106,8 @@ function App() {
   return (
     <div>
       <h2>Phonebook</h2>
+
+      <Notification notification={notification} />
 
       <Filter filter={filter} handleFilterChange={handleFilterChange}/>
       
