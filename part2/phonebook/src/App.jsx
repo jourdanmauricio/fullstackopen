@@ -66,7 +66,8 @@ function App() {
           })
           .catch(error => {
             console.log("Error", error)
-            handleNotification({message: 'An error happened while editing the contact', type: 'error'})
+            handleNotification({message: error.response.data.error, type: 'error'})
+            // handleNotification({message: 'An error happened while editing the contact', type: 'error'})
           })
       }
     } else {
@@ -78,7 +79,7 @@ function App() {
         })
         .catch(error => {
           console.log("Error", error)
-          handleNotification({message: 'An error occurred while creating the contact', type: 'error'})
+          handleNotification({message: error.response.data.error, type: 'error'})
         })
     }
   }
@@ -89,13 +90,15 @@ function App() {
       personService
         .remove(person.id)
         .then(response => {
-          const newPersons = persons.filter(person => person.id !== response.id)
+          console.log("Response", response)
+          const newPersons = persons.filter(el => el.id !== person.id)
           setPersons(newPersons)
           handleNotification({message: 'Contact deleted successfully', type: 'success'})
         })
         .catch(error => {
           console.log("Error", error)
-          handleNotification({message: 'An error occurred while deleting the contact', type: 'error'})
+          handleNotification({message: error.response.data.error, type: 'error'})
+          //handleNotification({message: 'An error occurred while deleting the contact', type: 'error'})
         })
     
     }
